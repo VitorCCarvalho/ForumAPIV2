@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
-using ForumCRUD.API.Data;
 using ForumCRUD.API.Data.Dtos.Forum;
+using ForumCRUD.API.Data;
 using ForumCRUD.API.Models;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;

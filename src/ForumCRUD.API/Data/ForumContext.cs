@@ -1,6 +1,7 @@
 ﻿using ForumCRUD.API.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Amazon.RDS;
 
 namespace ForumCRUD.API.Data;
 

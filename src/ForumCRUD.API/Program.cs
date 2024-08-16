@@ -1,8 +1,19 @@
+using Amazon;
+using ForumCRUD.API.Data;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
 builder.Services.AddControllers();
+builder.Services.AddControllersWithViews();
+var connectionString = builder.Configuration.GetConnectionString("ForumConnection");
+
+builder.Services.AddDbContext<ForumContext>(opts =>
+{
+    opts.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
+});
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
