@@ -1,9 +1,12 @@
 using Amazon;
 using ForumCRUD.API.Data;
 using ForumCRUD.API.Models;
+using ForumCRUD.API.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using System.Text;
 
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
@@ -40,6 +43,22 @@ builder.Services.AddSwaggerGen(c =>
     
 });
 
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme =
+        JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+    {
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(Encoding.UTF8.GetBytes("98ahyd9asn8dhFN0SDFNASDLKFNDSF0SD8uyr9esj8fdso0i")),
+        ValidateAudience = false,
+        ValidateIssuer = false,
+        ClockSkew = TimeSpan.Zero
+    };
+});
+
 builder.Services.AddIdentity<User, IdentityRole>()
                 .AddEntityFrameworkStores<ForumContext>()
                 .AddDefaultTokenProviders();
@@ -57,6 +76,9 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
+builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<TokenService>();
 
 var app = builder.Build();
 
