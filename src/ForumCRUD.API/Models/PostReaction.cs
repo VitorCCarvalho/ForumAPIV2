@@ -1,7 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 
 namespace ForumCRUD.API.Models;
 
+[PrimaryKey(nameof(PostId), nameof(UserId))]
 public class PostReaction
 {
     [Required(ErrorMessage = "Name is required.")]
