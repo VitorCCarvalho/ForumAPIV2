@@ -40,11 +40,11 @@ public class ForumController : ControllerBase
     {
         if (forumId == null)
         {
-            return _mapper.Map<List<ReadForumDto>>(_context.Forums.Take(take).ToList());
+            return _mapper.Map<List<ReadForumDto>>(_context.forums.Take(take).ToList());
         }
         else
         {
-            return _mapper.Map<List<ReadForumDto>>(_context.Forums.Take(take).
+            return _mapper.Map<List<ReadForumDto>>(_context.forums.Take(take).
                                                     Where(forum => forum.Id == forumId));
         }
     }
@@ -55,7 +55,7 @@ public class ForumController : ControllerBase
     [HttpGet("{forumId}")]
     public ReadForumDto GetForumsById(int forumId, [FromQuery] int take = 50)
     {
-        return _mapper.Map<ReadForumDto>(_context.Forums.FirstOrDefault(forum => forum.Id == forumId));
+        return _mapper.Map<ReadForumDto>(_context.forums.FirstOrDefault(forum => forum.Id == forumId));
     }
 
     /// <summary>
@@ -64,7 +64,7 @@ public class ForumController : ControllerBase
     [HttpPut("{forumId}")]
     public IActionResult PutForum(int forumId, [FromBody] UpdateForumDto dto)
     {
-        var forum = _context.Forums.FirstOrDefault(forum => forum.Id == forumId);
+        var forum = _context.forums.FirstOrDefault(forum => forum.Id == forumId);
         if (forum == null)
         {
             return NotFound();
@@ -81,7 +81,7 @@ public class ForumController : ControllerBase
     [HttpPatch("{forumId}")]
     public IActionResult PatchForum(int forumId, JsonPatchDocument<UpdateForumDto> patch)
     {
-        var forum = _context.Forums.FirstOrDefault(forum => forum.Id == forumId);
+        var forum = _context.forums.FirstOrDefault(forum => forum.Id == forumId);
         if (forum == null)
         {
             return NotFound();
@@ -105,7 +105,7 @@ public class ForumController : ControllerBase
     [HttpDelete("{forumId}")]
     public IActionResult DeleteForum(int forumId)
     {
-        var forum = _context.Forums.FirstOrDefault(forum => forum.Id == forumId);
+        var forum = _context.forums.FirstOrDefault(forum => forum.Id == forumId);
         if (forum == null)
         {
             return NotFound();

@@ -9,11 +9,11 @@ public class ForumContext: IdentityDbContext<User>
 {
     public ForumContext(DbContextOptions<ForumContext> opts) : base(opts) { }
 
-    public DbSet<Forum> Forums { get; set; }
-    public DbSet<FThread> Threads { get; set; }
-    public DbSet<Post> Posts { get; set; }
-    public DbSet<FThreadReaction> FThreadReaction { get; set; }
-    public DbSet<PostReaction> PostReaction { get; set; }
+    public DbSet<Forum> forums { get; set; }
+    public DbSet<FThread> threads { get; set; }
+    public DbSet<Post> posts { get; set; }
+    public DbSet<FThreadReaction> fthreadreaction { get; set; }
+    public DbSet<PostReaction> postreaction { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

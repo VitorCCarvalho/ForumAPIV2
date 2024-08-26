@@ -33,7 +33,7 @@ public class FThreadReactionController : ControllerBase
     public IEnumerable<ReadFThreadReactionDto> GetFThreadReactions([FromQuery] int take = 50)
     {
 
-        return _mapper.Map<List<ReadFThreadReactionDto>>(_context.FThreadReaction.Take(take).ToList());
+        return _mapper.Map<List<ReadFThreadReactionDto>>(_context.fthreadreaction.Take(take).ToList());
     }
 
     [HttpGet("{fthreadId}")]
@@ -41,15 +41,15 @@ public class FThreadReactionController : ControllerBase
     {
         if (reaction == "like")
         {
-            return _mapper.Map<List<ReadFThreadReactionDto>>(_context.FThreadReaction.Where(fthreadReaction => fthreadReaction.ThreadId == fthreadId & fthreadReaction.Reaction == true).ToList());
+            return _mapper.Map<List<ReadFThreadReactionDto>>(_context.fthreadreaction.Where(fthreadReaction => fthreadReaction.ThreadId == fthreadId & fthreadReaction.Reaction == true).ToList());
         }
         else if (reaction == "dislike")
         {
-            return _mapper.Map<List<ReadFThreadReactionDto>>(_context.FThreadReaction.Where(fthreadReaction => fthreadReaction.ThreadId == fthreadId & fthreadReaction.Reaction == false).ToList());
+            return _mapper.Map<List<ReadFThreadReactionDto>>(_context.fthreadreaction.Where(fthreadReaction => fthreadReaction.ThreadId == fthreadId & fthreadReaction.Reaction == false).ToList());
         }
         else
         {
-            return _mapper.Map<List<ReadFThreadReactionDto>>(_context.FThreadReaction.Where(fthreadReaction => fthreadReaction.ThreadId == fthreadId).ToList());
+            return _mapper.Map<List<ReadFThreadReactionDto>>(_context.fthreadreaction.Where(fthreadReaction => fthreadReaction.ThreadId == fthreadId).ToList());
         }
     }
 
@@ -57,9 +57,9 @@ public class FThreadReactionController : ControllerBase
     [HttpGet]
     public int GetFThreadReactionScore(int fthreadId)
     {
-        int dislikes = _context.FThreadReaction.Where(fthreadReaction => fthreadReaction.ThreadId == fthreadId && !fthreadReaction.Reaction).Count();
+        int dislikes = _context.fthreadreaction.Where(fthreadReaction => fthreadReaction.ThreadId == fthreadId && !fthreadReaction.Reaction).Count();
 
-        int likes = _context.FThreadReaction.Where(fthreadReaction => fthreadReaction.ThreadId == fthreadId & fthreadReaction.Reaction == true).Count();
+        int likes = _context.fthreadreaction.Where(fthreadReaction => fthreadReaction.ThreadId == fthreadId & fthreadReaction.Reaction == true).Count();
 
         return likes - dislikes;
     }
@@ -68,13 +68,13 @@ public class FThreadReactionController : ControllerBase
     [HttpGet("{fthreadId}/{userId}")]
     public ReadFThreadReactionDto GetFThreadReaction(int fthreadId, string UserId)
     {
-        return _mapper.Map<ReadFThreadReactionDto>(_context.FThreadReaction.FirstOrDefault(fthreadReaction => fthreadReaction.ThreadId == fthreadId & fthreadReaction.UserId == UserId));
+        return _mapper.Map<ReadFThreadReactionDto>(_context.fthreadreaction.FirstOrDefault(fthreadReaction => fthreadReaction.ThreadId == fthreadId & fthreadReaction.UserId == UserId));
     }
 
     [HttpPut("{fthreadId}/{userId}")]
     public IActionResult PutFThreadReaction([FromQuery] int fThreadId, [FromQuery] string UserId, [FromBody] UpdateFThreadDto dto)
     {
-        var fthreadReaction = _context.FThreadReaction.FirstOrDefault(fthreadReaction => fthreadReaction.ThreadId == fThreadId & fthreadReaction.UserId == UserId);
+        var fthreadReaction = _context.fthreadreaction.FirstOrDefault(fthreadReaction => fthreadReaction.ThreadId == fThreadId & fthreadReaction.UserId == UserId);
         if (fthreadReaction == null)
         {
             return NotFound();
@@ -87,7 +87,7 @@ public class FThreadReactionController : ControllerBase
     [HttpDelete("{fthreadId}/{userId}")]
     public IActionResult DeleteFThread(int fthreadId, string UserId)
     {
-        var fthreadReaction = _context.FThreadReaction.FirstOrDefault(fthreadReaction => fthreadReaction.ThreadId == fthreadId & fthreadReaction.UserId == UserId);
+        var fthreadReaction = _context.fthreadreaction.FirstOrDefault(fthreadReaction => fthreadReaction.ThreadId == fthreadId & fthreadReaction.UserId == UserId);
         if (fthreadReaction == null)
         {
             return NotFound();

@@ -41,11 +41,11 @@ public class PostController : ControllerBase
     {
         if (fthreadId == null)
         {
-            return _mapper.Map<List<ReadPostDto>>(_context.Posts.Take(take).ToList());
+            return _mapper.Map<List<ReadPostDto>>(_context.posts.Take(take).ToList());
         }
         else
         {
-            return _mapper.Map<List<ReadPostDto>>(_context.Posts.Take(take).
+            return _mapper.Map<List<ReadPostDto>>(_context.posts.Take(take).
                                                     Where(post => post.ThreadId == fthreadId));
         }
     }
@@ -56,7 +56,7 @@ public class PostController : ControllerBase
     [HttpGet("{postId}")]
     public ReadPostDto GetPostById(int postId)
     {
-        return _mapper.Map<ReadPostDto>(_context.Posts.FirstOrDefault(post => post.Id == postId));
+        return _mapper.Map<ReadPostDto>(_context.posts.FirstOrDefault(post => post.Id == postId));
     }
 
     /// <summary>
@@ -65,7 +65,7 @@ public class PostController : ControllerBase
     [HttpPut("{postId}")]
     public IActionResult PutPost(int postId, [FromBody] UpdatePostDto dto)
     {
-        var post = _context.Posts.FirstOrDefault(post => post.Id == postId);
+        var post = _context.posts.FirstOrDefault(post => post.Id == postId);
         if (post == null)
         {
             return NotFound();
@@ -73,15 +73,16 @@ public class PostController : ControllerBase
         _mapper.Map(dto, post);
         _context.SaveChanges();
         return NoContent();
+
     }
 
     /// <summary>
     /// Atualiza uma parte do post que possui postId como ID.
     /// </summary>
     [HttpPatch("{postId}")]
-    public IActionResult PatchForum(int postId, JsonPatchDocument<UpdateForumDto> patch)
+    public IActionResult PatchPost(int postId, JsonPatchDocument<UpdateForumDto> patch)
     {
-        var post = _context.Forums.FirstOrDefault(post => post.Id == postId);
+        var post = _context.posts.FirstOrDefault(post => post.Id == postId);
         if (post == null)
         {
             return NotFound();
@@ -106,7 +107,7 @@ public class PostController : ControllerBase
     [HttpDelete("{id}")]
     public IActionResult DeletePost(int postId)
     {
-        var post = _context.Forums.FirstOrDefault(post => post.Id == postId);
+        var post = _context.posts.FirstOrDefault(post => post.Id == postId);
         if (post == null)
         {
             return NotFound();

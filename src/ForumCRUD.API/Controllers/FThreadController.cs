@@ -39,11 +39,11 @@ public class FThreadController : ControllerBase
     {
         if (forumId == null)
         {
-            return _mapper.Map<List<ReadFThreadDto>>(_context.Threads.Take(take).ToList());
+            return _mapper.Map<List<ReadFThreadDto>>(_context.threads.Take(take).ToList());
         }
         else
         {
-            return _mapper.Map<List<ReadFThreadDto>>(_context.Threads.Take(take).
+            return _mapper.Map<List<ReadFThreadDto>>(_context.threads.Take(take).
                                                         Where(fthread => fthread.ForumID == forumId).ToList());
         }
     }
@@ -53,8 +53,7 @@ public class FThreadController : ControllerBase
     public IEnumerable<ReadFThreadDto> GetFThreads(int period)
     {
 
-        return _mapper.Map<List<ReadFThreadDto>>(_context.Threads.Where(fthread => fthread.DateCreated >= DateTime.Today.AddDays(-period)).ToList());
-
+        return _mapper.Map<List<ReadFThreadDto>>(_context.threads.Where(fthread => fthread.DateCreated >= DateTime.Today.AddDays(-period)).ToList());
 
     }
 
@@ -64,7 +63,7 @@ public class FThreadController : ControllerBase
     [HttpGet("{fthreadId}")]
     public ReadFThreadDto GetFThreadById(int fthreadId)
     {
-        return _mapper.Map<ReadFThreadDto>(_context.Threads.FirstOrDefault(fthread => fthread.Id == fthreadId));
+        return _mapper.Map<ReadFThreadDto>(_context.threads.FirstOrDefault(fthread => fthread.Id == fthreadId));
     }
 
 
@@ -75,7 +74,7 @@ public class FThreadController : ControllerBase
     [HttpPut("{fthreadId}")]
     public IActionResult PutFThread(int fthreadId, [FromBody] UpdateFThreadDto dto)
     {
-        var fthread = _context.Threads.FirstOrDefault(fthread => fthread.Id == fthreadId);
+        var fthread = _context.threads.FirstOrDefault(fthread => fthread.Id == fthreadId);
         if (fthread == null)
         {
             return NotFound();
@@ -91,7 +90,7 @@ public class FThreadController : ControllerBase
     [HttpPatch("{fthreadId}")]
     public IActionResult PatchFThread(int fthreadId, JsonPatchDocument<UpdateFThreadDto> patch)
     {
-        var fthread = _context.Threads.FirstOrDefault(fthread => fthread.Id == fthreadId);
+        var fthread = _context.threads.FirstOrDefault(fthread => fthread.Id == fthreadId);
         if (fthread == null)
         {
             return NotFound();
@@ -115,7 +114,7 @@ public class FThreadController : ControllerBase
     [HttpDelete("{fthreadId}")]
     public IActionResult DeleteFThread(int fthreadId)
     {
-        var fthread = _context.Threads.FirstOrDefault(fthread => fthread.Id == fthreadId);
+        var fthread = _context.threads.FirstOrDefault(fthread => fthread.Id == fthreadId);
         if (fthread == null)
         {
             return NotFound();

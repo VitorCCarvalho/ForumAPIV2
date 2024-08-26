@@ -34,11 +34,11 @@ public class PostReactionController : ControllerBase
     {
         if (postId == null)
         {
-            return _mapper.Map<List<ReadPostReactionDto>>(_context.PostReaction.Take(take).ToList());
+            return _mapper.Map<List<ReadPostReactionDto>>(_context.postreaction.Take(take).ToList());
         }
         else
         {
-            return _mapper.Map<List<ReadPostReactionDto>>(_context.PostReaction.Take(take).
+            return _mapper.Map<List<ReadPostReactionDto>>(_context.postreaction.Take(take).
                                                         Where(postReaction => postReaction.PostId == postId).ToList());
         }
     }
@@ -48,15 +48,15 @@ public class PostReactionController : ControllerBase
     {
         if (reaction == "like")
         {
-            return _mapper.Map<List<ReadPostReactionDto>>(_context.PostReaction.Where(postReaction => postReaction.PostId == postId & postReaction.Reaction == true).ToList());
+            return _mapper.Map<List<ReadPostReactionDto>>(_context.postreaction.Where(postReaction => postReaction.PostId == postId & postReaction.Reaction == true).ToList());
         }
         else if (reaction == "dislike")
         {
-            return _mapper.Map<List<ReadPostReactionDto>>(_context.PostReaction.Where(postReaction => postReaction.PostId == postId & postReaction.Reaction == false).ToList());
+            return _mapper.Map<List<ReadPostReactionDto>>(_context.postreaction.Where(postReaction => postReaction.PostId == postId & postReaction.Reaction == false).ToList());
         }
         else
         {
-            return _mapper.Map<List<ReadPostReactionDto>>(_context.PostReaction.Where(postReaction => postReaction.PostId == postId).ToList());
+            return _mapper.Map<List<ReadPostReactionDto>>(_context.postreaction.Where(postReaction => postReaction.PostId == postId).ToList());
         }
     }
 
@@ -64,9 +64,9 @@ public class PostReactionController : ControllerBase
     [HttpGet]
     public int GetPostReactionScore(int postId)
     {
-        int dislikes = _context.PostReaction.Where(postReaction => postReaction.PostId == postId && !postReaction.Reaction).Count();
+        int dislikes = _context.postreaction.Where(postReaction => postReaction.PostId == postId && !postReaction.Reaction).Count();
 
-        int likes = _context.PostReaction.Where(postReaction => postReaction.PostId == postId & postReaction.Reaction == true).Count();
+        int likes = _context.postreaction.Where(postReaction => postReaction.PostId == postId & postReaction.Reaction == true).Count();
 
         return likes - dislikes;
     }
@@ -74,13 +74,13 @@ public class PostReactionController : ControllerBase
     [HttpGet("{postId}/{userId}")]
     public ReadPostReactionDto GetPostReaction(int postId, string UserId)
     {
-        return _mapper.Map<ReadPostReactionDto>(_context.PostReaction.FirstOrDefault(postReaction => postReaction.PostId == postId & postReaction.UserId == UserId));
+        return _mapper.Map<ReadPostReactionDto>(_context.postreaction.FirstOrDefault(postReaction => postReaction.PostId == postId & postReaction.UserId == UserId));
     }
 
     [HttpPut("{fthreadId}/{userId}")]
     public IActionResult PutPostReaction([FromQuery] int fthreadId, [FromQuery] string UserId, [FromBody] UpdatePostDto dto)
     {
-        var postReaction = _context.PostReaction.FirstOrDefault(postReaction => postReaction.PostId == fthreadId & postReaction.UserId == UserId);
+        var postReaction = _context.postreaction.FirstOrDefault(postReaction => postReaction.PostId == fthreadId & postReaction.UserId == UserId);
         if (postReaction == null)
         {
             return NotFound();
@@ -93,7 +93,7 @@ public class PostReactionController : ControllerBase
     [HttpDelete("{postId}/{userId}")]
     public IActionResult DeleteFThread(int postId, string UserId)
     {
-        var postReaction = _context.PostReaction.FirstOrDefault(postReaction => postReaction.PostId == postId & postReaction.UserId == UserId);
+        var postReaction = _context.postreaction.FirstOrDefault(postReaction => postReaction.PostId == postId & postReaction.UserId == UserId);
         if (postReaction == null)
         {
             return NotFound();
