@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ForumCRUD.API.Controllers;
 
+[ApiController]
+[Route("[controller]")]
 public class FThreadController : ControllerBase
 {
     private ForumContext _context;
