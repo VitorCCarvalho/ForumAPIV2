@@ -28,8 +28,6 @@ public class ForumContext: IdentityDbContext<User>
                    .WithMany(user => user.Posts)
                    .HasForeignKey(post => post.UserId);
 
-
-
         builder.Entity<FThread>()
                    .HasOne(fthread => fthread.Forum)
                    .WithMany(forum => forum.Threads)
