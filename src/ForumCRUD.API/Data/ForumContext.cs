@@ -15,6 +15,8 @@ public class ForumContext: IdentityDbContext<User>
     public DbSet<FThreadReaction> fthreadreaction { get; set; }
     public DbSet<PostReaction> postreaction { get; set; }
 
+    public DbSet<FThreadImage> fthreadimage { get; set; }
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
 
@@ -62,6 +64,11 @@ public class ForumContext: IdentityDbContext<User>
                    .HasOne(postReaction => postReaction.Post)
                    .WithMany(post => post.Reactions)
                    .HasForeignKey(postReaction => postReaction.PostId);
+
+        builder.Entity<FThreadImage>()
+                   .HasOne(fthreadImage => fthreadImage.FThread)
+                   .WithMany(fthread => fthread.Images)
+                   .HasForeignKey(fthreadImage => fthreadImage.FThreadId);
 
         base.OnModelCreating(builder);
     }

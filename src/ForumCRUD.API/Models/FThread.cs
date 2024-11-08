@@ -25,4 +25,6 @@ public class FThread
     public bool? Locked { get; set; } = false;
     public virtual ICollection<Post> Posts { get; set; }
     public virtual ICollection<FThreadReaction> Reactions { get; set; }
+
+    public virtual ICollection<FThreadImage> Images { get; set; }
 }
