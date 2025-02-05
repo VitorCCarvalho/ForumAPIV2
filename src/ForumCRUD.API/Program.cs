@@ -17,7 +17,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddControllersWithViews();
-var connectionString = builder.Configuration.GetConnectionString("ForumConnection");
+var connectionString = builder.Configuration["DB_CONNECTION_STRING"];
 
 builder.Services.AddDbContext<ForumContext>(opts =>
 {
@@ -32,7 +32,7 @@ builder.Services.AddSwaggerGen(c =>
     {
         Title = "ForumAPI",
         Version = "v1",
-        Description = "Projeto de API para um Fórum de Discussão",
+        Description = "Projeto de API para um Fï¿½rum de Discussï¿½o",
         Contact = new OpenApiContact
         {
             Name = "Vitor Carvalho",
@@ -78,6 +78,8 @@ builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<TokenService>();
+
+builder.Configuration.AddUserSecrets<Program>();
 
 var app = builder.Build();
 
