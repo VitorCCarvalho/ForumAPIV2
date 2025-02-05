@@ -476,3 +476,5 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 src/ForumCRUD.API/appsettings.json
+src/ForumCRUD.API/appsettings.Development.json
+.env
