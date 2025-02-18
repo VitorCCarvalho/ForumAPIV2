@@ -21,6 +21,11 @@ RUN dotnet publish "ForumCRUD.API.csproj" -c Release -o /app/publish /p:UseAppHo
 FROM mcr.microsoft.com/dotnet/aspnet:7.0 AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-EXPOSE 80
-EXPOSE 443
-ENTRYPOINT ["dotnet", "ForumCRUD.API.dll"]
+
+# Set the ASP.NET Core URLs to listen on all interfaces
+ENV ASPNETCORE_ENVIRONMENT=Development
+ENV ASPNETCORE_URLS=http://+:5203
+
+EXPOSE 5203
+
+ENTRYPOINT ["dotnet", "ForumCRUD.API.dll", "--server-urls", "http://+:5203"]
