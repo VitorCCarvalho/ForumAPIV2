@@ -27,5 +27,6 @@ ENV ASPNETCORE_ENVIRONMENT=Development
 ENV ASPNETCORE_URLS=http://+:5203
 
 EXPOSE 5203
+EXPOSE 5203/tcp
 
-ENTRYPOINT ["dotnet", "ForumCRUD.API.dll", "--server-urls", "http://+:5203"]
+ENTRYPOINT ["dotnet", "ForumCRUD.API.dll"]

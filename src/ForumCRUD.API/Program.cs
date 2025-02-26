@@ -10,8 +10,18 @@ using System.Text;
 
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
-
 var builder = WebApplication.CreateBuilder(args);
+
+// Add CORS configuration
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: MyAllowSpecificOrigins,
+        policy =>
+        {
+            policy.AllowAnyOrigin()
+                .AllowAnyHeader()
+                .AllowAnyMethod();});
+});
 
 // Add services to the container.
 
@@ -32,7 +42,7 @@ builder.Services.AddSwaggerGen(c =>
     {
         Title = "ForumAPI",
         Version = "v1",
-        Description = "Projeto de API para um F�rum de Discuss�o",
+        Description = "Projeto de API para um Fórum de Discussão",
         Contact = new OpenApiContact
         {
             Name = "Vitor Carvalho",
@@ -62,17 +72,6 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddIdentity<User, IdentityRole>()
                 .AddEntityFrameworkStores<ForumContext>()
                 .AddDefaultTokenProviders();
-
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy(name: MyAllowSpecificOrigins,
-                      builder =>
-                      {
-                          builder.WithOrigins("*")
-                         .AllowAnyHeader()
-                          .AllowAnyMethod(); ;
-                      });
-});
 
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
