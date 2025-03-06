@@ -1,9 +1,12 @@
-﻿using AutoMapper;
+using AutoMapper;
 using ForumCRUD.API.Data;
 using ForumCRUD.API.Data.Dtos.FThread;
 using ForumCRUD.API.Data.Dtos.FThreadImage;
 using ForumCRUD.API.Models;
+using ForumCRUD.API.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 
 namespace ForumCRUD.API.Controllers;
 
@@ -13,60 +16,73 @@ public class FThreadImageController : ControllerBase
 {
     private ForumContext _context;
     private IMapper _mapper;
+    private readonly DatabaseQueueService _queueService;
 
-    public FThreadImageController(ForumContext context, IMapper mapper)
+    public FThreadImageController(ForumContext context, IMapper mapper, DatabaseQueueService queueService)
     {
         _context = context;
         _mapper = mapper;
+        _queueService = queueService;
     }
 
     [HttpPost]
-    public IActionResult PostFThreadImage([FromBody] CreateFThreadImageDto dto)
+    public async Task<IActionResult> PostFThreadImage([FromBody] CreateFThreadImageDto dto)
     {
-        FThreadImage fthreadImage = _mapper.Map<FThreadImage>(dto);
-        _context.Add(fthreadImage);
-        _context.SaveChanges();
-        return Created("ThreadImage created", fthreadImage);
+        return await _queueService.ExecuteWithConnectionLimitAsync<IActionResult>(async () =>
+        {
+            FThreadImage fthreadImage = _mapper.Map<FThreadImage>(dto);
+            _context.Add(fthreadImage);
+            await _context.SaveChangesAsync();
+            return Created("ThreadImage created", fthreadImage);
+        });
     }
 
     [HttpGet]
-    public IEnumerable<ReadFThreadImageDto> GetFThreadImages([FromQuery] int? fthreadId, [FromQuery] int take = 50)
+    public async Task<IActionResult> GetFThreadImages([FromQuery] int? fthreadId, [FromQuery] int take = 50)
     {
-        if (fthreadId == null)
+        return await _queueService.ExecuteWithConnectionLimitAsync<IActionResult>(async () =>
         {
-            return _mapper.Map<List<ReadFThreadImageDto>>(_context.fthreadimage.Take(take).ToList());
-        }
-        else
-        {
-            return _mapper.Map<List<ReadFThreadImageDto>>(_context.fthreadimage.Take(take).
-                                                        Where(fthreadImage => fthreadImage.FThreadId == fthreadId).ToList());
-        }
+            if (fthreadId == null)
+            {
+                return Ok(_mapper.Map<List<ReadFThreadImageDto>>(await _context.fthreadimage.Take(take).ToListAsync()));
+            }
+            else
+            {
+                return Ok(_mapper.Map<List<ReadFThreadImageDto>>(await _context.fthreadimage.Take(take).
+                                                            Where(fthreadImage => fthreadImage.FThreadId == fthreadId).ToListAsync()));
+            }
+        });
     }
 
     [HttpPut("{fthreadImageId}")]
-    public IActionResult PutFThreadImage(int fthreadImageId, [FromBody] UpdateFThreadImageDto dto)
+    public async Task<IActionResult> PutFThreadImage(int fthreadImageId, [FromBody] UpdateFThreadImageDto dto)
     {
-        var fthreadImage = _context.fthreadimage.FirstOrDefault(fthreadImage => fthreadImage.Id == fthreadImageId);
-        if (fthreadImage == null)
+        return await _queueService.ExecuteWithConnectionLimitAsync<IActionResult>(async () =>
         {
-            return NotFound();
-        }
-        _mapper.Map(dto, fthreadImage);
-        _context.SaveChanges();
-        return NoContent();
+            var fthreadImage = await _context.fthreadimage.FirstOrDefaultAsync(fthreadImage => fthreadImage.Id == fthreadImageId);
+            if (fthreadImage == null)
+            {
+                return NotFound();
+            }
+            _mapper.Map(dto, fthreadImage);
+            await _context.SaveChangesAsync();
+            return NoContent();
+        });
     }
 
     [HttpDelete("{fthreadImageId}")]
-    public IActionResult DeleteFThreadImage(int fthreadImageId)
+    public async Task<IActionResult> DeleteFThreadImage(int fthreadImageId)
     {
-        var fthread = _context.threads.FirstOrDefault(fthread => fthread.Id == fthreadImageId);
-        if (fthread == null)
+        return await _queueService.ExecuteWithConnectionLimitAsync<IActionResult>(async () =>
         {
-            return NotFound();
-        }
-        _context.Remove(fthread);
-        _context.SaveChanges();
-        return NoContent();
+            var fthread = await _context.threads.FirstOrDefaultAsync(fthread => fthread.Id == fthreadImageId);
+            if (fthread == null)
+            {
+                return NotFound();
+            }
+            _context.Remove(fthread);
+            await _context.SaveChangesAsync();
+            return NoContent();
+        });
     }
-
 }

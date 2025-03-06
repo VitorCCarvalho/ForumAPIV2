@@ -1,9 +1,12 @@
-﻿using AutoMapper;
+using AutoMapper;
 using ForumCRUD.API.Data.Dtos.Forum;
 using ForumCRUD.API.Data;
 using ForumCRUD.API.Models;
+using ForumCRUD.API.Services;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 
 namespace ForumApp.Controllers;
 
@@ -13,107 +16,124 @@ public class ForumController : ControllerBase
 {
     private ForumContext _context;
     private IMapper _mapper;
+    private readonly DatabaseQueueService _queueService;
 
-    public ForumController(ForumContext forumContext, IMapper mapper)
+    public ForumController(ForumContext forumContext, IMapper mapper, DatabaseQueueService queueService)
     {
         _context = forumContext;
         _mapper = mapper;
+        _queueService = queueService;
     }
 
     /// <summary>
     /// Cria um fórum novo.
     /// </summary>
     [HttpPost]
-    public IActionResult PostForum([FromBody] CreateForumDto dto)
+    public async Task<IActionResult> PostForum([FromBody] CreateForumDto dto)
     {
-        Forum forum = _mapper.Map<Forum>(dto);
-        _context.Add(forum);
-        _context.SaveChanges();
-        return Created("Forum created", forum);
+        return await _queueService.ExecuteWithConnectionLimitAsync<IActionResult>(async () =>
+        {
+            Forum forum = _mapper.Map<Forum>(dto);
+            _context.Add(forum);
+            await _context.SaveChangesAsync();
+            return Created("Forum created", forum);
+        });
     }
 
     /// <summary>
     /// Retorna todos os fóruns.
     /// </summary>
     [HttpGet]
-    public IEnumerable<ReadForumDto> GetForums([FromQuery] int take = 50, [FromQuery] int? forumId = null)
+    public async Task<IEnumerable<ReadForumDto>> GetForums([FromQuery] int take = 50, [FromQuery] int? forumId = null)
     {
-        if (forumId == null)
+        return await _queueService.ExecuteWithConnectionLimitAsync(async () =>
         {
-            return _mapper.Map<List<ReadForumDto>>(_context.forums.Take(take).ToList());
-        }
-        else
-        {
-            return _mapper.Map<List<ReadForumDto>>(_context.forums.Take(take).
-                                                    Where(forum => forum.Id == forumId));
-        }
+            if (forumId == null)
+            {
+                return _mapper.Map<List<ReadForumDto>>(await _context.forums.Take(take).ToListAsync());
+            }
+            else
+            {
+                return _mapper.Map<List<ReadForumDto>>(await _context.forums.Take(take)
+                                                       .Where(forum => forum.Id == forumId).ToListAsync());
+            }
+        });
     }
 
     /// <summary>
     /// Retorna o fórum que possui forumId como ID.
     /// </summary>
     [HttpGet("{forumId}")]
-    public ReadForumDto GetForumsById(int forumId, [FromQuery] int take = 50)
+    public async Task<ReadForumDto> GetForumsById(int forumId, [FromQuery] int take = 50)
     {
-        return _mapper.Map<ReadForumDto>(_context.forums.FirstOrDefault(forum => forum.Id == forumId));
+        return await _queueService.ExecuteWithConnectionLimitAsync(async () =>
+        {
+            return _mapper.Map<ReadForumDto>(await _context.forums.FirstOrDefaultAsync(forum => forum.Id == forumId));
+        });
     }
 
     /// <summary>
     /// Atualiza o fórum que possui forumId como ID.
     /// </summary>
     [HttpPut("{forumId}")]
-    public IActionResult PutForum(int forumId, [FromBody] UpdateForumDto dto)
+    public async Task<IActionResult> PutForum(int forumId, [FromBody] UpdateForumDto dto)
     {
-        var forum = _context.forums.FirstOrDefault(forum => forum.Id == forumId);
-        if (forum == null)
+        return await _queueService.ExecuteWithConnectionLimitAsync<IActionResult>(async () =>
         {
-            return NotFound();
-        }
-        _mapper.Map(dto, forum);
-        _context.SaveChanges();
-        return NoContent();
+            var forum = await _context.forums.FirstOrDefaultAsync(forum => forum.Id == forumId);
+            if (forum == null)
+            {
+                return NotFound();
+            }
+            _mapper.Map(dto, forum);
+            await _context.SaveChangesAsync();
+            return NoContent();
+        });
     }
-
 
     /// <summary>
     /// Atualiza uma parte do fórum que possui forumId como ID.
     /// </summary>
     [HttpPatch("{forumId}")]
-    public IActionResult PatchForum(int forumId, JsonPatchDocument<UpdateForumDto> patch)
+    public async Task<IActionResult> PatchForum(int forumId, JsonPatchDocument<UpdateForumDto> patch)
     {
-        var forum = _context.forums.FirstOrDefault(forum => forum.Id == forumId);
-        if (forum == null)
+        return await _queueService.ExecuteWithConnectionLimitAsync<IActionResult>(async () =>
         {
-            return NotFound();
-        }
-        var forumPatch = _mapper.Map<UpdateForumDto>(forum);
-        patch.ApplyTo(forumPatch, ModelState);
+            var forum = await _context.forums.FirstOrDefaultAsync(forum => forum.Id == forumId);
+            if (forum == null)
+            {
+                return NotFound();
+            }
+            var forumPatch = _mapper.Map<UpdateForumDto>(forum);
+            patch.ApplyTo(forumPatch, ModelState);
 
-        if (!TryValidateModel(forumPatch))
-        {
-            return ValidationProblem(ModelState);
-        }
+            if (!TryValidateModel(forumPatch))
+            {
+                return ValidationProblem(ModelState);
+            }
 
-        _mapper.Map(forumPatch, forum);
-        _context.SaveChanges();
-        return NoContent();
+            _mapper.Map(forumPatch, forum);
+            await _context.SaveChangesAsync();
+            return NoContent();
+        });
     }
 
     /// <summary>
     /// Deleta o fórum que possui forumId como ID.
     /// </summary>
     [HttpDelete("{forumId}")]
-    public IActionResult DeleteForum(int forumId)
+    public async Task<IActionResult> DeleteForum(int forumId)
     {
-        var forum = _context.forums.FirstOrDefault(forum => forum.Id == forumId);
-        if (forum == null)
+        return await _queueService.ExecuteWithConnectionLimitAsync<IActionResult>(async () =>
         {
-            return NotFound();
-        }
-        _context.Remove(forum);
-        _context.SaveChanges();
-        return NoContent();
+            var forum = await _context.forums.FirstOrDefaultAsync(forum => forum.Id == forumId);
+            if (forum == null)
+            {
+                return NotFound();
+            }
+            _context.Remove(forum);
+            await _context.SaveChangesAsync();
+            return NoContent();
+        });
     }
-
-
 }
