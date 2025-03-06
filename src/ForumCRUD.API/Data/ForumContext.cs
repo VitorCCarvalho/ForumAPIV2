@@ -1,13 +1,23 @@
-﻿using ForumCRUD.API.Models;
+using ForumCRUD.API.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Amazon.RDS;
+using Microsoft.Extensions.Logging;
 
 namespace ForumCRUD.API.Data;
 
 public class ForumContext: IdentityDbContext<User>
 {
+    private readonly ILogger<MySqlRetryConnectionInterceptor> _logger;
+
     public ForumContext(DbContextOptions<ForumContext> opts) : base(opts) { }
+
+    public ForumContext(
+        DbContextOptions<ForumContext> opts,
+        ILogger<MySqlRetryConnectionInterceptor> logger) : base(opts)
+    {
+        _logger = logger;
+    }
 
     public DbSet<Forum> forums { get; set; }
     public DbSet<FThread> threads { get; set; }
@@ -71,5 +81,49 @@ public class ForumContext: IdentityDbContext<User>
                    .HasForeignKey(fthreadImage => fthreadImage.FThreadId);
 
         base.OnModelCreating(builder);
+    }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        // This will be called after the initial configuration from Program.cs
+        if (!optionsBuilder.IsConfigured)
+        {
+            // Apply default configuration if not already configured
+            return;
+        }
+
+        // Add additional interceptors - this will be applied even if configured in Program.cs
+        if (_logger != null)
+        {
+            optionsBuilder.AddInterceptors(new MySqlRetryConnectionInterceptor(_logger));
+        }
+    }
+
+    /// <summary>
+    /// Executes database operations with automatic retries for connection errors
+    /// </summary>
+    /// <typeparam name="TResult">The type of the result</typeparam>
+    /// <param name="operation">The database operation to execute</param>
+    /// <returns>The result of the operation</returns>
+    public async Task<TResult> ExecuteWithRetryAsync<TResult>(Func<Task<TResult>> operation)
+    {
+        // Get the execution strategy from the context
+        var strategy = Database.CreateExecutionStrategy();
+        
+        // Execute the operation with the strategy
+        return await strategy.ExecuteAsync(operation);
+    }
+
+    /// <summary>
+    /// Executes database operations with automatic retries for connection errors
+    /// </summary>
+    /// <param name="operation">The database operation to execute</param>
+    public async Task ExecuteWithRetryAsync(Func<Task> operation)
+    {
+        // Get the execution strategy from the context
+        var strategy = Database.CreateExecutionStrategy();
+        
+        // Execute the operation with the strategy
+        await strategy.ExecuteAsync(operation);
     }
 }
