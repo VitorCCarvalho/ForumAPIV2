@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using ForumCRUD.API.Data.Dtos.User;
 using ForumCRUD.API.Models;
 using Microsoft.AspNetCore.Identity;
@@ -11,58 +11,65 @@ public class UserService
     private UserManager<User> _userManager;
     private SignInManager<User> _signInManager;
     private TokenService _tokenService;
+    private DatabaseQueueService _queueService;
 
-    public UserService(IMapper mapper, UserManager<User> userManager, SignInManager<User> signInManager, TokenService tokenService)
+    public UserService(IMapper mapper, UserManager<User> userManager, SignInManager<User> signInManager, TokenService tokenService, DatabaseQueueService queueService)
     {
         _mapper = mapper;
         _userManager = userManager;
         _signInManager = signInManager;
         _tokenService = tokenService;
+        _queueService = queueService;
     }
-
-
 
     public async Task<string> SignUp(CreateUserDto dto)
     {
-        User user = _mapper.Map<User>(dto);
-
-        IdentityResult resultado = await _userManager.CreateAsync(user, dto.Password);
-
-        if (!resultado.Succeeded)
+        return await _queueService.ExecuteWithConnectionLimitAsync(async () =>
         {
-            return "error";
-        }
+            User user = _mapper.Map<User>(dto);
 
-        return "User signed up";
+            IdentityResult resultado = await _userManager.CreateAsync(user, dto.Password);
+
+            if (!resultado.Succeeded)
+            {
+                return "error";
+            }
+
+            return await _tokenService.GenerateToken(user);
+        });
     }
 
     internal async Task<string> Login(LoginUserDto dto)
     {
-        var resultado = await _signInManager.PasswordSignInAsync(dto.Username, dto.Password, false, false);
-
-        if (!resultado.Succeeded)
+        return await _queueService.ExecuteWithConnectionLimitAsync(async () =>
         {
-            return "unauthorized";
-        }
+            var resultado = await _signInManager.PasswordSignInAsync(dto.Username, dto.Password, false, false);
 
-        var user = _signInManager.UserManager.Users.FirstOrDefault(user => user.NormalizedUserName == dto.Username.ToUpper());
+            if (!resultado.Succeeded)
+            {
+                return "unauthorized";
+            }
 
-        var token = _tokenService.GenerateToken(user);
+            var user = _signInManager.UserManager.Users.FirstOrDefault(user => user.NormalizedUserName == dto.Username.ToUpper());
 
-        return token;
+            return await _tokenService.GenerateToken(user);
+        });
     }
 
     public async Task<ReadUserDto> GetUser(string userId)
     {
-        var user = await _userManager.FindByIdAsync(userId);
-        if (user != null)
+        return await _queueService.ExecuteWithConnectionLimitAsync(async () =>
         {
-            var userMap = _mapper.Map<ReadUserDto>(user);
-            return userMap;
-        }
-        else
-        {
-            throw new ApplicationException("Usuário não encontrado");
-        }
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user != null)
+            {
+                var userMap = _mapper.Map<ReadUserDto>(user);
+                return userMap;
+            }
+            else
+            {
+                throw new ApplicationException("Usuário não encontrado");
+            }
+        });
     }
 }
